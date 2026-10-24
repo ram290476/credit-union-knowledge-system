@@ -1,7 +1,8 @@
 """Submission entry point.
 
-The harness loads this module and calls ``build()``. Snapshot ingestion and
-conflict resolution are implemented. Answer generation follows in a later change.
+The harness loads this module and calls ``build()``. Ingestion, conflict
+resolution, and answers are implemented. The practice-question score is recorded
+separately.
 """
 
 from __future__ import annotations
