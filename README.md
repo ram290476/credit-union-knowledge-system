@@ -1,8 +1,8 @@
 # Credit union knowledge system
 
-A Python knowledge system that reads dated snapshots of a credit union website and, once the later pieces land, answers member questions from what was true at the time. This repository currently implements **snapshot ingestion** ([issue #2](https://github.com/ram290476/credit-union-knowledge-system/issues/2)).
+A Python knowledge system that reads dated snapshots of a credit union website and, once answer generation lands, answers member questions from what was true at the time. This repository implements snapshot ingestion ([issue #2](https://github.com/ram290476/credit-union-knowledge-system/issues/2)) and conflict resolution ([issue #3](https://github.com/ram290476/credit-union-knowledge-system/issues/3)).
 
-Conflict resolution ([#3](https://github.com/ram290476/credit-union-knowledge-system/issues/3)), answer generation ([#4](https://github.com/ram290476/credit-union-knowledge-system/issues/4)), and practice-set scoring ([#5](https://github.com/ram290476/credit-union-knowledge-system/issues/5)) are separate changes. Until those land, `answer()` abstains and `conflicts()` is empty.
+Answer generation ([#4](https://github.com/ram290476/credit-union-knowledge-system/issues/4)) and practice-set scoring ([#5](https://github.com/ram290476/credit-union-knowledge-system/issues/5)) are separate changes. Until those land, `answer()` abstains.
 
 Design notes live on the [wiki](https://github.com/ram290476/credit-union-knowledge-system/wiki/Home). The running log is the [Build Log](https://github.com/ram290476/credit-union-knowledge-system/wiki/Build-Log).
 
@@ -14,7 +14,7 @@ Design notes live on the [wiki](https://github.com/ram290476/credit-union-knowle
 |---|---|
 | `ingest(snapshot)` | Implemented. Stores every page, passage, and qualified fact with its snapshot id, date, URL, and fetch time. |
 | `answer(question, as_of=None)` | Stub. Abstains with no digits so the protocol stays callable. |
-| `conflicts()` | Stub. Returns an empty list. |
+| `conflicts()` | Implemented. Returns disagreeing facts, the winning value, and why. |
 
 The scorer passes `Snapshot` / `Page` objects from `harness/contract.py`. Ingestion only reads attributes (`snapshot_id`, `taken_on`, `pages`, `url`, `title`, `markdown`, `fetched_at`), so it does not import the harness.
 
@@ -30,6 +30,12 @@ For each snapshot, oldest first:
 `snapshot_as_of(date)` returns the latest snapshot with `taken_on` on or before that date. `None` means the newest snapshot. `answer()` does not use that choice yet.
 
 Tiers stay on separate rows. APY and APR from the same row stay separate facts. The loader does not call the live website.
+
+## Conflicts
+
+`conflicts()` groups facts that name the same metric, term, balance tier, and model-year window but not the same number. A cell that says APR is an APR even when the column header says yield. Shifted model-year windows that mostly overlap (for example 2023–2026 and 2024–2027 on a 60-month term) are one group. Different tiers, APY versus APR, and illustrative examples are not conflicts.
+
+The winning value is the one on the newest snapshot's highest-authority page. Paths that look like rate or fee sheets outrank calculators, promos, news, and blogs. Each conflict includes the competing values, a source for each value, the resolution, and a short reason.
 
 ## Setup
 
@@ -58,7 +64,8 @@ Continuous integration is the `validate` workflow: ruff, unit tests, and the fiv
 | Path | Role |
 |---|---|
 | `solution.py` | `build()` entry point the scorer imports |
-| `knowledge/system.py` | `ingest`, plus the answer and conflict stubs |
+| `knowledge/system.py` | `ingest`, `conflicts`, and the answer stub |
+| `knowledge/conflicts.py` | Group disagreeing facts and pick the winning value |
 | `knowledge/store.py` | Versioned store and as-of lookup |
 | `knowledge/parse.py` | Markdown passages and qualified facts |
 | `knowledge/snapshot_loader.py` | Read `manifest.json` + `pages/*.md` for the smoke run |

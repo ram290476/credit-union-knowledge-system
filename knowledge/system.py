@@ -1,7 +1,8 @@
-"""KnowledgeSystem facade. Ingestion is implemented; answers and conflicts are later issues."""
+"""KnowledgeSystem facade. Ingestion and conflict resolution are implemented."""
 
 from __future__ import annotations
 
+from knowledge.conflicts import resolve_conflicts
 from knowledge.contract_types import boundary_types
 from knowledge.models import SnapshotRecord
 from knowledge.store import VersionedStore
@@ -10,8 +11,8 @@ from knowledge.store import VersionedStore
 class KnowledgeSystem:
     """Holds the versioned store built by ``ingest``.
 
-    ``answer`` and ``conflicts`` stay on the object so the harness protocol is
-    intact. They abstain and return no contradictions until issues #4 and #3.
+    ``conflicts`` reports disagreeing facts and which value won. ``answer``
+    still abstains until issue #4.
     """
 
     def __init__(self) -> None:
@@ -36,4 +37,6 @@ class KnowledgeSystem:
         )
 
     def conflicts(self) -> list[object]:
-        return []
+        """Contradictions across pages and snapshots, each with a winning value."""
+
+        return resolve_conflicts(self.store)
