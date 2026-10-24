@@ -11,8 +11,15 @@ This project is a knowledge system over five credit union website snapshots: que
 3. **Implement against the issue.** Do the work (via a coding agent) on a branch, and open a PR that links the issue (for example `Closes #123`).
 4. **Wait for CI.** Wait for the `validate` job to pass. (adapted from investor-dashboard: this repo has no CI workflow yet as of 2026-10-24; until a `validate` job exists, state in the PR that no CI ran, and add a `validate` job when CI is introduced.)
 5. **Squash-merge.** Once `validate` passes, squash-merge the PR (`gh pr merge --squash`). Do not rely on GitHub auto-merge: the repo has no required checks, so auto-merge would merge immediately.
+   - **Merge checklist:** Refuse to merge a pull request whose linked issue body is still a placeholder. Flesh out the issue and get the user's approval first (see "Issue as source of truth").
 6. **Update the wiki with the fix.** Once the issue is fixed (merged), update the related wiki page again with screenshots showing the fix, embedded in the wiki page itself: commit the image files into the wiki repo (for example an `images/` folder in the `.wiki.git` repo) and render them inline with relative markdown image links (for example `![Fix](images/issue-123-after.png)`). Do not link to external URLs such as `raw.githubusercontent.com`.
 7. **Deploy destroy check.** Merging to `main` automatically triggers the "Deploy production" workflow. After the merge, check the Terraform `Plan:` line in the deploy. If it would destroy or replace any resource, cancel the deploy immediately and report back instead of letting it proceed. A normal plan shows `0 to destroy`. (adapted from investor-dashboard: this repo has no deploy workflow or Terraform yet; the rule applies once deploy infra exists.)
+
+## Issue as source of truth
+
+- **Acceptance criteria first.** Every coding issue must carry its own acceptance criteria before implementation begins: what "done" looks like, inputs and outputs, edge cases, and how the work gets verified.
+- **No code on a placeholder.** If an issue body is just a placeholder, flesh it out first and wait for the user's approval before writing any code.
+- **Where each record lives.** The issue is the source of truth for the work item, alongside the wiki and the build log. The wiki explains the system, the build log records what happened, and the issue defines what this piece of work must do.
 
 ## Related rules
 
