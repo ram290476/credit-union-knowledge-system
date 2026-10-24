@@ -1,8 +1,8 @@
 """Submission entry point.
 
 The harness loads this module and calls ``build()``. Ingestion, conflict
-resolution, and answers are implemented. The practice-question score is recorded
-separately.
+resolution, and answers are implemented. The practice-question score is in
+the README.
 """
 
 from __future__ import annotations

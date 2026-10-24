@@ -6,7 +6,7 @@
 
 Markdown is split into passages and into facts. Table rows keep their tier text in the label, and the column header decides whether a percent is APY, APR, dividend rate, or another metric. Short prose such as `6-month certificate APY: 2.95%` or a fee line becomes a fact too. Qualifiers record term, model-year window, balance tier, jumbo, special, and a few product words. Illustrative payment sentences are stored and tagged `example` so a later step can discount them. The fact `template` blanks out amounts so two snapshots of the same sentence can be compared without treating the number as part of the identity.
 
-`snapshot_as_of` is available on the store now because the timeline is known at ingest. `answer()` does not apply it until answer generation is implemented.
+`snapshot_as_of` selects the snapshot `answer()` is allowed to read. A later crawl is ignored when the question names an earlier date.
 
 The participant website snapshots are not in this repository. CI smokes five synthetic snapshots with the kit's snapshot ids and dates.
 
@@ -22,7 +22,7 @@ A cell that literally says APR or APY keeps that metric when the column header d
 
 ## API keys
 
-None. Ingestion and conflict resolution do not call a language model or any other network service.
+None are required. Ingestion, conflict resolution, and answers do not call a language model or any other network service. The kit scorer can optionally judge `dup-005` when `ANTHROPIC_API_KEY` is set in the environment. This repository does not read that variable. The score in the README was recorded with it unset.
 
 ## Answers
 
@@ -34,6 +34,8 @@ Passage answers are used for facts that are not a single rate: hours, addresses,
 
 Abstention is the sentence "I don't know; that isn't listed. Please contact us." with `confident=False` and no digits. It is what a 7/1 ARM rate, a construction-loan rate, and Mullan Avenue lobby hours get, because those pages name the topic and do not publish the number.
 
-## Not in this change
+## Practice evaluation
 
-The practice-question score is issue #5.
+`harness/run_eval.py` from the participant kit drives `build`, five `ingest` calls, forty `answer` calls, and `conflicts()`. The command and the 2026-10-24 result (final score 0.969) are in the README. CI does not run that eval: the website snapshots are not committed. `validate` lints, runs the unit tests, and smokes five synthetic snapshots.
+
+`dup-005` stays at 0 on the deterministic scorer because `must_include` is empty. The conflicts pillar is absent from the public file, so the published 0.969 is accuracy, consistency, and speed after renormalizing. A hidden eval that supplies conflicts gold, extra as-of questions, or rewordings is scored by the same functions; the practice answers are not stored as a lookup table.
