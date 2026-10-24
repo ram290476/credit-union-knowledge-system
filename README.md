@@ -1,8 +1,6 @@
 # Credit union knowledge system
 
-A Python knowledge system that reads dated snapshots of a credit union website and answers member questions from what was true at the time. This repository implements snapshot ingestion ([issue #2](https://github.com/ram290476/credit-union-knowledge-system/issues/2)), conflict resolution ([issue #3](https://github.com/ram290476/credit-union-knowledge-system/issues/3)), and answers with citations or abstention ([issue #4](https://github.com/ram290476/credit-union-knowledge-system/issues/4)).
-
-Practice-set scoring ([#5](https://github.com/ram290476/credit-union-knowledge-system/issues/5)) is a separate change.
+A Python knowledge system that reads dated snapshots of a credit union website and answers member questions from what was true at the time. This repository implements snapshot ingestion ([issue #2](https://github.com/ram290476/credit-union-knowledge-system/issues/2)), conflict resolution ([issue #3](https://github.com/ram290476/credit-union-knowledge-system/issues/3)), and answers with citations or abstention ([issue #4](https://github.com/ram290476/credit-union-knowledge-system/issues/4)). The practice-question score is [0.969](#practice-score) ([issue #5](https://github.com/ram290476/credit-union-knowledge-system/issues/5)).
 
 Design notes live on the [wiki](https://github.com/ram290476/credit-union-knowledge-system/wiki/Home). The running log is the [Build Log](https://github.com/ram290476/credit-union-knowledge-system/wiki/Build-Log).
 
@@ -79,4 +77,32 @@ Continuous integration is the `validate` workflow: ruff, unit tests, and the fiv
 | `scripts/smoke_snapshots.py` | Five-snapshot smoke |
 | `tests/fixtures/snapshots/` | Synthetic snapshots used in CI |
 
-See `NOTES.md` for the ingestion decisions.
+See `NOTES.md` for the ingestion, conflict, and answer decisions.
+
+## Practice score
+
+The participant kit is not in this repository. From a checkout, with the kit unpacked on disk and no API key set:
+
+```bash
+python /path/to/kit/harness/run_eval.py \
+  --submission . \
+  --snapshots /path/to/kit/snapshots \
+  --eval /path/to/kit/eval/public_eval.jsonl \
+  --out /tmp/eval-out
+```
+
+Recorded on 2026-10-24 with that command (Python 3, `ANTHROPIC_API_KEY` unset):
+
+| Measure | Result |
+|---|---|
+| Questions | 40 |
+| `qa_score` / `final_score` | 0.969 |
+| Stale-trap hits | 0 |
+| Errors | 0 |
+| Consistency | 1.0 (20 paraphrase groups, 20 repeats) |
+| Speed | p95 0.15 s, score 1.0 |
+| Ingest | 7.5 s (limit 30 minutes; ingest is not part of the speed score) |
+
+The public file does not include a conflicts gold set, so that pillar is omitted and the remaining weights are renormalized. Every public category scored 1.00 except `list_completeness` at 0.75.
+
+The miss is `dup-005` (weight 2.0). Its `must_include` list is empty, and `scoring.py` records correctness 0 for an empty list unless the optional judge runs. The answer still lists the certificate APYs from the latest snapshot and does not ask which term the member wants (`must_not_include` is the phrase "Which certificate term would you like"). Setting `ANTHROPIC_API_KEY` lets the kit scorer call its judge; this repository never calls a model. No practice answers are hard-coded.
