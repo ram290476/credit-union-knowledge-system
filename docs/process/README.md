@@ -17,6 +17,7 @@ Imported on 2026-10-24 from [ram290476/investor-dashboard](https://github.com/ra
 ## Local additions
 
 - 2026-10-24: Added the wiki-update rule to `AGENTS.md` (steps 2 and 6 of the standard workflow). Local addition, not from investor-dashboard. Same day, step 6 was amended to require screenshots committed into the wiki repo and embedded inline with relative links, not external URLs.
+- 2026-10-24: Added the "Issue as source of truth" section and the squash-merge checklist item (no merge while the linked issue body is a placeholder) to `AGENTS.md` (#16). Local addition, not from investor-dashboard.
 
 ## Project context
 
