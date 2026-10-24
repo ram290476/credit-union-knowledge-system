@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -22,6 +23,55 @@ def _page(url: str, markdown: str, title: str = "Page") -> SimpleNamespace:
 
 def _snap(snapshot_id: str, taken_on: str, pages: list[SimpleNamespace]) -> SimpleNamespace:
     return SimpleNamespace(snapshot_id=snapshot_id, taken_on=taken_on, pages=pages)
+
+
+class AnswerTests(unittest.TestCase):
+    def test_as_of_uses_the_snapshot_then_in_effect(self) -> None:
+        system = build()
+        system.ingest(
+            _snap(
+                "01_2026-05-12_baseline",
+                "2026-05-12",
+                [
+                    _page(
+                        "https://example-cu.test/rates/certificates",
+                        "# Certificates\n\n6-month certificate APY: 2.95%\n",
+                    )
+                ],
+            )
+        )
+        system.ingest(
+            _snap(
+                "02_2026-05-19_recrawl",
+                "2026-05-19",
+                [
+                    _page(
+                        "https://example-cu.test/rates/certificates",
+                        "# Certificates\n\n6-month certificate APY: 3.50%\n",
+                    )
+                ],
+            )
+        )
+        early = system.answer("What is the 6-month certificate APY?", as_of="2026-05-15")
+        self.assertIn("2.95%", early.text)
+        self.assertNotIn("3.50%", early.text)
+        later = system.answer("What is the 6-month certificate APY?", as_of="2026-05-31")
+        self.assertIn("3.50%", later.text)
+        self.assertNotIn("2.95%", later.text)
+        self.assertTrue(later.sources)
+
+    def test_unpublished_rate_abstains_without_digits(self) -> None:
+        system = build()
+        system.ingest(
+            _snap(
+                "05_2026-09-28_latest",
+                "2026-09-28",
+                [_page("https://example-cu.test/blog", "# Loans\n\nWe offer a 7/1 ARM.\n")],
+            )
+        )
+        answer = system.answer("What is your rate on a 7/1 adjustable-rate mortgage?")
+        self.assertFalse(answer.confident)
+        self.assertIsNone(re.search(r"\d", answer.text))
 
 
 class ConflictTests(unittest.TestCase):

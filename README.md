@@ -1,8 +1,8 @@
 # Credit union knowledge system
 
-A Python knowledge system that reads dated snapshots of a credit union website and, once answer generation lands, answers member questions from what was true at the time. This repository implements snapshot ingestion ([issue #2](https://github.com/ram290476/credit-union-knowledge-system/issues/2)) and conflict resolution ([issue #3](https://github.com/ram290476/credit-union-knowledge-system/issues/3)).
+A Python knowledge system that reads dated snapshots of a credit union website and answers member questions from what was true at the time. This repository implements snapshot ingestion ([issue #2](https://github.com/ram290476/credit-union-knowledge-system/issues/2)), conflict resolution ([issue #3](https://github.com/ram290476/credit-union-knowledge-system/issues/3)), and answers with citations or abstention ([issue #4](https://github.com/ram290476/credit-union-knowledge-system/issues/4)).
 
-Answer generation ([#4](https://github.com/ram290476/credit-union-knowledge-system/issues/4)) and practice-set scoring ([#5](https://github.com/ram290476/credit-union-knowledge-system/issues/5)) are separate changes. Until those land, `answer()` abstains.
+Practice-set scoring ([#5](https://github.com/ram290476/credit-union-knowledge-system/issues/5)) is a separate change.
 
 Design notes live on the [wiki](https://github.com/ram290476/credit-union-knowledge-system/wiki/Home). The running log is the [Build Log](https://github.com/ram290476/credit-union-knowledge-system/wiki/Build-Log).
 
@@ -13,7 +13,7 @@ Design notes live on the [wiki](https://github.com/ram290476/credit-union-knowle
 | Method | Status |
 |---|---|
 | `ingest(snapshot)` | Implemented. Stores every page, passage, and qualified fact with its snapshot id, date, URL, and fetch time. |
-| `answer(question, as_of=None)` | Stub. Abstains with no digits so the protocol stays callable. |
+| `answer(question, as_of=None)` | Implemented. Answers from the snapshot in effect on that date, cites the page, and abstains with no digits when the snapshot does not say. |
 | `conflicts()` | Implemented. Returns disagreeing facts, the winning value, and why. |
 
 The scorer passes `Snapshot` / `Page` objects from `harness/contract.py`. Ingestion only reads attributes (`snapshot_id`, `taken_on`, `pages`, `url`, `title`, `markdown`, `fetched_at`), so it does not import the harness.
@@ -27,7 +27,7 @@ For each snapshot, oldest first:
 - Facts from table cells and short prose: metric (`apy`, `apr`, `dividend`, `rate`, `fee`, and the other column kinds), numeric value, unit, and qualifiers (term, model-year window, balance tier, jumbo, special, product word).
 - Added, removed, changed, and unchanged canonical URLs versus the previous snapshot by date.
 
-`snapshot_as_of(date)` returns the latest snapshot with `taken_on` on or before that date. `None` means the newest snapshot. `answer()` does not use that choice yet.
+`snapshot_as_of(date)` returns the latest snapshot with `taken_on` on or before that date. `None` means the newest snapshot. `answer()` uses that snapshot and does not read later pages.
 
 Tiers stay on separate rows. APY and APR from the same row stay separate facts. The loader does not call the live website.
 
@@ -36,6 +36,12 @@ Tiers stay on separate rows. APY and APR from the same row stay separate facts. 
 `conflicts()` groups facts that name the same metric, term, balance tier, and model-year window but not the same number. A cell that says APR is an APR even when the column header says yield. Shifted model-year windows that mostly overlap (for example 2023–2026 and 2024–2027 on a 60-month term) are one group. Different tiers, APY versus APR, and illustrative examples are not conflicts.
 
 The winning value is the one on the newest snapshot's highest-authority page. Paths that look like rate or fee sheets outrank calculators, promos, news, and blogs. Each conflict includes the competing values, a source for each value, the resolution, and a short reason.
+
+## Answers
+
+`answer(question, as_of)` reads only the snapshot selected by `as_of`. Rate questions use the qualified facts and prefer the official product page (auto loans, home loans, savings, checking) over a calculator or promo, so a stale table on the same crawl does not replace the rate sheet. A question that names a term, model year, jumbo flag, or balance tier keeps those constraints, which is what separates two savings tiers and two model-year windows.
+
+Other questions quote a short passage from that snapshot: routing number, branch hours, addresses, Forbes recognition, Hy-Vee closure, membership, and similar facts. If the snapshot does not state the requested rate or hours, the answer is an abstention with `confident=False` and no digits. Sources carry the page URL, snapshot id, and a short quote.
 
 ## Setup
 
@@ -64,8 +70,9 @@ Continuous integration is the `validate` workflow: ruff, unit tests, and the fiv
 | Path | Role |
 |---|---|
 | `solution.py` | `build()` entry point the scorer imports |
-| `knowledge/system.py` | `ingest`, `conflicts`, and the answer stub |
+| `knowledge/system.py` | `ingest`, `conflicts`, and `answer` |
 | `knowledge/conflicts.py` | Group disagreeing facts and pick the winning value |
+| `knowledge/answer.py` | Citations, as-of filtering, and abstention |
 | `knowledge/store.py` | Versioned store and as-of lookup |
 | `knowledge/parse.py` | Markdown passages and qualified facts |
 | `knowledge/snapshot_loader.py` | Read `manifest.json` + `pages/*.md` for the smoke run |

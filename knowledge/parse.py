@@ -109,7 +109,8 @@ def _add_table(result: ParseResult, section: str, table_lines: list[str]) -> Non
                 if cell:
                     label_parts.append(cell)
                 continue
-            if _is_value_cell(cell):
+            # A program name that mentions "$100,000 or less" is still a label.
+            if _is_value_cell(cell) and not _is_descriptive_cell(cell):
                 values.append((header, cell))
             elif cell:
                 label_parts.append(cell)
@@ -321,6 +322,12 @@ def _is_tier_cell(header: str, cell: str) -> bool:
     if header and _metric_from_header(header) == "tier":
         return True
     return TIER_RE.search(cell) is not None
+
+
+def _is_descriptive_cell(cell: str) -> bool:
+    words = re.sub(r"\$?\s*\d[\d,]*(?:\.\d+)?%?", " ", cell)
+    letters = re.sub(r"[^A-Za-z]", "", words)
+    return len(letters) >= 8
 
 
 def _is_value_cell(cell: str) -> bool:

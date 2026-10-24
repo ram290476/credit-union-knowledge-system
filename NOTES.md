@@ -24,6 +24,16 @@ A cell that literally says APR or APY keeps that metric when the column header d
 
 None. Ingestion and conflict resolution do not call a language model or any other network service.
 
+## Answers
+
+`answer()` calls `snapshot_as_of` and ignores every later snapshot. That is why "as of May 2026" can still report a certificate APY that has since changed, without mentioning the newer number.
+
+Within the chosen snapshot, a rate question is a filter over facts: metric, term, model-year window, jumbo or special, Roth versus traditional, and balance tier. The surviving fact with the highest page score wins. Auto questions prefer `auto-motorcycle-loans`. Mortgage questions prefer `home-loans`. Calculators, switch pages, and guidance pages are scored down so a copied stale table does not win. A program cell that says "30-Year ... $100,000 or less" stays a label, so the loan amount does not erase the term.
+
+Passage answers are used for facts that are not a single rate: hours, addresses, recognition, branch counts, wallets, membership, and phone or URL instructions. The branch count is the number in the boilerplate of the article with the latest dateline in its header, which is where "22" and "23" disagree. Hours, Forbes, and Hy-Vee answers are copied from the page text rather than filled in from memory.
+
+Abstention is the sentence "I don't know; that isn't listed. Please contact us." with `confident=False` and no digits. It is what a 7/1 ARM rate, a construction-loan rate, and Mullan Avenue lobby hours get, because those pages name the topic and do not publish the number.
+
 ## Not in this change
 
-Retrieval, citations, abstention when a question is unsupported, and `as_of` inside `answer()` are issue #4. The practice-question score is issue #5.
+The practice-question score is issue #5.
