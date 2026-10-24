@@ -1,0 +1,30 @@
+{
+  "snapshot_id": "03_2026-06-09_recrawl",
+  "taken_on": "2026-06-09",
+  "pages": [
+    {
+      "file": "pages/certificates.md",
+      "url": "https://example-cu.test/rates/certificates",
+      "title": "Certificates",
+      "fetched_at": "2026-06-09T12:00:00Z"
+    },
+    {
+      "file": "pages/fees.md",
+      "url": "https://example-cu.test/fees",
+      "title": "Fees",
+      "fetched_at": "2026-06-09T12:00:00Z"
+    },
+    {
+      "file": "pages/promo.md",
+      "url": "https://example-cu.test/promo",
+      "title": "Promo",
+      "fetched_at": "2026-06-09T12:00:00Z"
+    },
+    {
+      "file": "pages/notes.md",
+      "url": "https://example-cu.test/notes",
+      "title": "Notes",
+      "fetched_at": "2026-06-09T12:00:00Z"
+    }
+  ]
+}

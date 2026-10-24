@@ -1,0 +1,3 @@
+# Runtime dependencies: none.
+# Snapshot ingestion uses the Python 3.9+ standard library only.
+# No API keys and no language-model client.
