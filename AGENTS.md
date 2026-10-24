@@ -7,10 +7,12 @@ This project is a knowledge system over five credit union website snapshots: que
 ## Standard workflow for any new work
 
 1. **Issue first.** Create a GitHub issue describing the work before any code changes.
-2. **Implement against the issue.** Do the work (via a coding agent) on a branch, and open a PR that links the issue (for example `Closes #123`).
-3. **Wait for CI.** Wait for the `validate` job to pass. (adapted from investor-dashboard: this repo has no CI workflow yet as of 2026-10-24; until a `validate` job exists, state in the PR that no CI ran, and add a `validate` job when CI is introduced.)
-4. **Squash-merge.** Once `validate` passes, squash-merge the PR (`gh pr merge --squash`). Do not rely on GitHub auto-merge: the repo has no required checks, so auto-merge would merge immediately.
-5. **Deploy destroy check.** Merging to `main` automatically triggers the "Deploy production" workflow. After the merge, check the Terraform `Plan:` line in the deploy. If it would destroy or replace any resource, cancel the deploy immediately and report back instead of letting it proceed. A normal plan shows `0 to destroy`. (adapted from investor-dashboard: this repo has no deploy workflow or Terraform yet; the rule applies once deploy infra exists.)
+2. **Link the wiki.** If the issue relates to an existing wiki page, update that wiki page to reference the new issue (link it, for example `#123`).
+3. **Implement against the issue.** Do the work (via a coding agent) on a branch, and open a PR that links the issue (for example `Closes #123`).
+4. **Wait for CI.** Wait for the `validate` job to pass. (adapted from investor-dashboard: this repo has no CI workflow yet as of 2026-10-24; until a `validate` job exists, state in the PR that no CI ran, and add a `validate` job when CI is introduced.)
+5. **Squash-merge.** Once `validate` passes, squash-merge the PR (`gh pr merge --squash`). Do not rely on GitHub auto-merge: the repo has no required checks, so auto-merge would merge immediately.
+6. **Update the wiki with the fix.** Once the issue is fixed (merged), update the related wiki page again with screenshots showing the fix. Embed screenshots with `raw.githubusercontent.com` URLs.
+7. **Deploy destroy check.** Merging to `main` automatically triggers the "Deploy production" workflow. After the merge, check the Terraform `Plan:` line in the deploy. If it would destroy or replace any resource, cancel the deploy immediately and report back instead of letting it proceed. A normal plan shows `0 to destroy`. (adapted from investor-dashboard: this repo has no deploy workflow or Terraform yet; the rule applies once deploy infra exists.)
 
 ## Related rules
 
