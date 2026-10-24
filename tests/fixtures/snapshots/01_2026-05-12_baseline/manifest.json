@@ -1,0 +1,18 @@
+{
+  "snapshot_id": "01_2026-05-12_baseline",
+  "taken_on": "2026-05-12",
+  "pages": [
+    {
+      "file": "pages/certificates.md",
+      "url": "https://example-cu.test/rates/certificates",
+      "title": "Certificates",
+      "fetched_at": "2026-05-12T12:00:00Z"
+    },
+    {
+      "file": "pages/fees.md",
+      "url": "https://example-cu.test/fees",
+      "title": "Fees",
+      "fetched_at": "2026-05-12T12:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "snapshot_id": "02_2026-05-19_recrawl",
+  "taken_on": "2026-05-19",
+  "pages": [
+    {
+      "file": "pages/certificates.md",
+      "url": "https://example-cu.test/rates/certificates",
+      "title": "Certificates",
+      "fetched_at": "2026-05-19T12:00:00Z"
+    },
+    {
+      "file": "pages/fees.md",
+      "url": "https://example-cu.test/fees",
+      "title": "Fees",
+      "fetched_at": "2026-05-19T12:00:00Z"
+    },
+    {
+      "file": "pages/promo.md",
+      "url": "https://example-cu.test/promo",
+      "title": "Promo",
+      "fetched_at": "2026-05-19T12:00:00Z"
+    }
+  ]
+}
