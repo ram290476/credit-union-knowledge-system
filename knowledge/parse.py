@@ -118,7 +118,7 @@ def _add_table(result: ParseResult, section: str, table_lines: list[str]) -> Non
         for header, cell in values:
             if len(result.facts) >= MAX_FACTS_PER_PAGE:
                 return
-            metric = _metric_from_header(header) if header else _metric_from_text(cell)
+            metric = _metric_for_cell(header, cell)
             number, unit = _first_number(cell, metric)
             raw_value = _strip_percent_footnote(cell)
             excerpt = f"{label} | {header}: {raw_value}".strip(" |")
@@ -208,10 +208,15 @@ def _qualifiers(text: str) -> tuple[str, ...]:
         end_raw = match.group(2)
         if len(end_raw) == 4:
             end = int(end_raw)
-        else:
+        elif len(end_raw) == 2:
             end = (start // 100) * 100 + int(end_raw)
             if end < start:
                 end += 100
+        else:
+            continue
+        # Dates and unrelated ranges (2026-09, 2022-21) are not model years.
+        if end < start or end - start > 12:
+            continue
         found.append(f"model:{start}-{end}")
     tier = TIER_RE.search(text)
     if tier:
@@ -222,12 +227,32 @@ def _qualifiers(text: str) -> tuple[str, ...]:
         found.append("jumbo")
     if "special" in lowered:
         found.append("special")
+    if re.search(r"\broth\b", lowered):
+        found.append("roth")
+    if re.search(r"\btraditional\b", lowered):
+        found.append("traditional")
     if re.search(r"illustrative|for example|if you borrow", lowered):
         found.append("example")
     for word in PRODUCT_WORDS:
         if re.search(rf"\b{word}\b", lowered):
             found.append(f"product:{word}")
     return tuple(dict.fromkeys(found))
+
+
+def _metric_for_cell(header: str, cell: str) -> str:
+    """Prefer an explicit APR/APY/dividend in the cell over a mismatched header.
+
+    Some rate tables are copied under a yield heading while the cell still
+    says APR. The cell is the fact; the header is only a fallback.
+    """
+
+    cell_metric = _metric_from_text(cell)
+    if not header:
+        return cell_metric
+    header_metric = _metric_from_header(header)
+    if cell_metric in {"apy", "apr", "dividend", "fee"} and cell_metric != header_metric:
+        return cell_metric
+    return header_metric
 
 
 def _metric_from_header(header: str) -> str:

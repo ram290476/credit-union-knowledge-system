@@ -1,6 +1,6 @@
 """In-process knowledge system.
 
-Snapshot ingestion lives here. Later issues add conflict resolution and answers.
+Snapshot ingestion and conflict resolution live here. Answers come later.
 """
 
 from knowledge.system import KnowledgeSystem
